@@ -1,7 +1,7 @@
 ---
 name: portainer
-description: Control Docker containers and stacks via Portainer API. List containers, start/stop/restart, view logs, and redeploy stacks from git.
-metadata: {"clawdbot":{"emoji":"🐳","requires":{"bins":["curl","jq"],"env":["PORTAINER_API_KEY"]},"primaryEnv":"PORTAINER_API_KEY"}}
+description: Control Docker containers and stacks via direct Portainer API or a compatible /portainer read-only proxy. Use for status, endpoints, containers, stacks, stack-info, logs, networks, and container-info; write actions are direct-mode only.
+metadata: {"clawdbot":{"emoji":"🐳","requires":{"bins":["curl","jq"],"env":["PORTAINER_URL"]}}}
 ---
 
 # 🐳 Portainer Skill
@@ -23,15 +23,19 @@ metadata: {"clawdbot":{"emoji":"🐳","requires":{"bins":["curl","jq"],"env":["P
 
 ## 📖 What Does This Skill Do?
 
-The **Portainer Skill** gives you control over your Docker infrastructure through Portainer's REST API. Manage containers, stacks, and deployments without touching the web UI.
+The **Portainer Skill** controls Docker infrastructure in two modes:
+- **Direct mode**: talk straight to Portainer (`X-API-Key` auth)
+- **Proxy mode**: talk to a compatible `/portainer` endpoint (`Bearer` auth, read-only)
 
 **Features:**
 - 📊 **Status** — Check Portainer server status
 - 🖥️ **Endpoints** — List all Docker environments
-- 📦 **Containers** — List, start, stop, restart containers
-- 📚 **Stacks** — List and manage Docker Compose stacks
-- 🔄 **Redeploy** — Pull from git and redeploy stacks
+- 📦 **Containers** — List containers
+- 📚 **Stacks / Stack Info** — List stacks and inspect a stack
+- 🌐 **Networks** — List Docker networks (new)
+- 🔎 **Container Info** — Inspect a container (new)
 - 📜 **Logs** — View container logs
+- 🔄 **Write actions** (`start/stop/restart/redeploy`) — direct mode only
 
 ---
 
@@ -41,7 +45,7 @@ The **Portainer Skill** gives you control over your Docker infrastructure throug
 |------|---------|
 | **Portainer** | Version 2.x with API access |
 | **Tools** | `curl`, `jq` |
-| **Auth** | API Access Token |
+| **Auth** | `PORTAINER_API_KEY` |
 
 ### Setup
 
@@ -51,11 +55,15 @@ The **Portainer Skill** gives you control over your Docker infrastructure throug
    - Scroll to "Access tokens" → Add access token
    - Copy the token (you won't see it again!)
 
-2. **Configure credentials:**
+2. **Configure credentials (choose one mode):**
    ```bash
-   # Add to ~/.clawdbot/.env
+   # Direct Portainer mode
    PORTAINER_URL=https://your-portainer-server:9443
    PORTAINER_API_KEY=ptr_your_token_here
+
+   # Compatible proxy mode (read-only)
+   PORTAINER_URL=https://your-api-server:8000/portainer
+   PORTAINER_API_KEY=your_proxy_token_here
    ```
 
 3. **Ready!** 🚀
@@ -186,6 +194,20 @@ This will:
 ```
 
 ---
+
+### `networks` — List Docker Networks
+
+```bash
+./portainer.sh networks
+./portainer.sh networks 3
+```
+
+### `container-info` — Inspect One Container
+
+```bash
+./portainer.sh container-info steinbergerraum-web-1
+./portainer.sh container-info steinbergerraum-web-1 4
+```
 
 ### `logs` — View Container Logs
 
